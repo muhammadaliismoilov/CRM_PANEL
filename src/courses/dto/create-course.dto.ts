@@ -1,32 +1,30 @@
 import { IsNotEmpty, IsString, IsPhoneNumber, IsOptional, Length } from 'class-validator';
 
+// Kurs yaratish uchun ma'lumotlar tuzilmasi (DTO)
 export class CreateCourseDto {
-  @IsNotEmpty({ message: 'Course name is required' })
-  @IsString({ message: 'Course name must be a string' })
-  @Length(1, 255, { message: 'Course name must be between 1 and 255 characters' })
+  // Kurs nomi majburiy bo‘lib, satr bo‘lishi va 1-255 belgi oralig‘ida bo‘lishi kerak
+  @IsNotEmpty({ message: 'Kurs nomi kiritilishi shart' })
+  @IsString({ message: 'Kurs nomi satr bo‘lishi kerak' })
+  @Length(1, 255, { message: 'Kurs nomi 1 dan 255 belgigacha bo‘lishi kerak' })
   courseName: string;
 
-  @IsNotEmpty({ message: 'Lesson days are required' })
-  @IsString({ message: 'Lesson days must be a string' })
-  @Length(1, 255, { message: 'Lesson days must be between 1 and 255 characters' })
+  // Dars kunlari majburiy bo‘lib, satr bo‘lishi va 1-255 belgi oralig‘ida bo‘lishi kerak
+  @IsNotEmpty({ message: 'Dars kunlari kiritilishi shart' })
+  @IsString({ message: 'Dars kunlari satr bo‘lishi kerak' })
+  @Length(1, 255, { message: 'Dars kunlari 1 dan 255 belgigacha bo‘lishi kerak' })
   lessonDays: string;
 
-  @IsNotEmpty({ message: 'Lesson time is required' })
-  @IsString({ message: 'Lesson time must be a string' })
-  @Length(1, 50, { message: 'Lesson time must be between 1 and 50 characters' })
+  // Dars vaqti majburiy bo‘lib, satr bo‘lishi va 1-50 belgi oralig‘ida bo‘lishi kerak
+  @IsNotEmpty({ message: 'Dars vaqti kiritilishi shart' })
+  @IsString({ message: 'Dars vaqti satr bo‘lishi kerak' })
+  @Length(1, 50, { message: 'Dars vaqti 1 dan 50 belgigacha bo‘lishi kerak' })
   lessonTime: string;
 
-  @IsNotEmpty({ message: 'Teacher name is required' })
-  @IsString({ message: 'Teacher name must be a string' })
-  @Length(1, 255, { message: 'Teacher name must be between 1 and 255 characters' })
-  teacherName: string;
+  // O‘qituvchi ismi majburiy bo‘lib, satr bo‘lishi va 1-255 belgi oralig‘ida bo‘lishi kerak
+  @IsNotEmpty({ message: 'O‘qituvchi ID kiritilishi shart' })
+  @IsString({ message: 'O‘qituvchi ID satr bo‘lishi kerak' })
+  @Length(1, 255, { message: 'O‘qituvchi ID 1 dan 255 belgigacha bo‘lishi kerak' })
+  teacherId: string;
 
-  @IsNotEmpty({ message: 'Teacher phone number is required' })
-  @IsPhoneNumber('UZ', { message: 'Invalid phone number format for Uzbekistan' })
-  teacherPhoneNumber: string;
-
-  @IsOptional()
-  @IsString({ message: 'Teacher image must be a string' })
-  @Length(0, 255, { message: 'Teacher image must be between 0 and 255 characters' })
-  teacherImg?: string;
+  
 }

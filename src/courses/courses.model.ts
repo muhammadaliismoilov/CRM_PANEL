@@ -1,8 +1,9 @@
-import { Table, Column, Model, DataType, PrimaryKey, Default, HasMany, CreatedAt, UpdatedAt } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, PrimaryKey, Default, HasMany, CreatedAt, UpdatedAt, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { v4 as uuidv4 } from 'uuid';
-import { student } from './student.model';
+import { student } from '../students/student.model';
+import { teachers } from '../teachers/teachers.model';
 
-@Table
+@Table({ tableName: 'courses' })
 export class courses extends Model {
   @PrimaryKey
   @Default(() => uuidv4())
@@ -10,7 +11,7 @@ export class courses extends Model {
     type: DataType.UUID,
     allowNull: false,
   })
-  declare  id: string;
+  declare id: string;
 
   @Column({
     type: DataType.STRING(255),
@@ -30,23 +31,15 @@ export class courses extends Model {
   })
   lessonTime: string;
 
+  @ForeignKey(() => teachers)
   @Column({
-    type: DataType.STRING(255),
+    type: DataType.UUID,
     allowNull: false,
   })
-  teacherName: string;
+  teacherId: string;
 
-  @Column({
-    type: DataType.STRING(20),
-    allowNull: false,
-  })
-  teacherPhoneNumber: string;
-
-  @Column({
-    type: DataType.STRING(255),
-    allowNull: true,
-  })
-  teacherImg: string;
+  @BelongsTo(() => teachers)
+  teacher: teachers;
 
   @HasMany(() => student)
   students: student[];
@@ -55,7 +48,7 @@ export class courses extends Model {
   @Column({
     type: DataType.DATE,
   })
-  declare  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdatedAt
   @Column({

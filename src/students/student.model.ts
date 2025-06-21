@@ -1,6 +1,6 @@
 import { Table, Column, Model, DataType, PrimaryKey, Default, ForeignKey, BelongsTo, CreatedAt, UpdatedAt } from 'sequelize-typescript';
 import { v4 as uuidv4 } from 'uuid';
-import { courses } from './courses.model';
+import { courses } from '../courses/courses.model';
 
 @Table
 export class student extends Model {
@@ -59,6 +59,12 @@ export class student extends Model {
     defaultValue: 'student',
   })
   role: string;
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  itArrived: boolean
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+  isPaid: boolean
 
   @ForeignKey(() => courses)
   @Column({

@@ -3,6 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { StudentModule } from './students/students.module';
 import { CoursesModule } from './courses/courses.module';
+import { TeachersModule } from './teachers/teachers.module';
+import { AdminsModule } from './admins/admins.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { CoursesModule } from './courses/courses.module';
     }),
     StudentModule,
     CoursesModule,
+    TeachersModule,
+    AdminsModule,
   ],
 })
 export class AppModule {}
