@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { attendances } from './attendance.model';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
@@ -30,7 +30,9 @@ export class AttendanceService {
     if (!course) {
       throw new NotFoundException(`ID ${courseId} bo‘yicha kurs topilmadi`);
     }
-
+    if(student && course){
+      throw new BadRequestException("Siz yo`lamadan o`tgansiz")
+    }
     return await this.attendanceModel.create(createAttendanceDto as any);
   }
 

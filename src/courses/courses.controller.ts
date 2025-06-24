@@ -1,17 +1,21 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto} from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { courses } from './courses.model';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/guards/roles.decarator';
 
 @ApiTags('courses')
 @Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
-  @Post()
+  @Post("/create")
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Yangi kurs yaratish' })
   @ApiResponse({ status: 201, description: 'Kurs muvaffaqiyatli yaratildi', type: courses })
   @ApiBody({ type: CreateCourseDto })
@@ -19,14 +23,18 @@ export class CoursesController {
     return this.coursesService.create(createCourseDto);
   }
 
-  @Get()
+  @Get("/getAll")
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Barcha kurslarni olish' })
   @ApiResponse({ status: 200, description: 'Kurslar ro‘yxati', type: [courses] })
   async findAll(): Promise<courses[]> {
     return this.coursesService.findAll();
   }
 
-  @Get(':id')
+  @Get('/getOne:id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin','teacher')
   @ApiOperation({ summary: 'ID bo‘yicha kursni olish' })
   @ApiParam({ name: 'id', description: 'Kursning UUID identifikatori', type: String })
   @ApiResponse({ status: 200, description: 'Kurs ma‘lumotlari', type: courses })
@@ -36,6 +44,8 @@ export class CoursesController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Kurs ma‘lumotlarini yangilash' })
   @ApiParam({ name: 'id', description: 'Kursning UUID identifikatori', type: String })
   @ApiBody({ type: UpdateCourseDto })
@@ -46,6 +56,8 @@ export class CoursesController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Kursni o‘chirish' })
   @ApiParam({ name: 'id', description: 'Kursning UUID identifikatori', type: String })

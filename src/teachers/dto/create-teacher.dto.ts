@@ -24,7 +24,7 @@ export class CreateTeacherDto {
   @IsNotEmpty()
   password: string;
 
-  @ApiProperty({ enum: Role, example: Role.TEACHER, description: 'O‘qituvchining roli' })
+  @ApiProperty({ enum: Role, example: Role.TEACHER,default:Role.TEACHER, description: 'O‘qituvchining roli' })
   @IsEnum(Role)
   @IsOptional()
   role?: Role;

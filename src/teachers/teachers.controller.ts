@@ -1,16 +1,20 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { TeachersService } from './teachers.service';
 import { CreateTeacherDto } from './dto/create-teacher.dto';
 import { UpdateTeacherDto} from './dto/update-teacher.dto';
 import { teachers } from './teachers.model';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/guards/roles.decarator';
 
 @ApiTags('teachers')
 @Controller('teachers')
 export class TeachersController {
   constructor(private readonly teachersService: TeachersService) {}
 
-  @Post()
+  @Post("/create")
+  @UseGuards(JwtAuthGuard)
+      @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Yangi o‘qituvchi yaratish' })
   @ApiResponse({ status: 201, description: 'O‘qituvchi muvaffaqiyatli yaratildi', type: teachers })
@@ -20,14 +24,18 @@ export class TeachersController {
     return this.teachersService.create(createTeacherDto);
   }
 
-  @Get()
+  @Get("/getAll")
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Barcha o‘qituvchilarni olish' })
   @ApiResponse({ status: 200, description: 'O‘qituvchilar ro‘yxati', type: [teachers] })
   async findAll(): Promise<teachers[]> {
     return this.teachersService.findAll();
   }
 
-  @Get(':id')
+  @Get('/getOne/:id')
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'ID bo‘yicha o‘qituvchini olish' })
   @ApiParam({ name: 'id', description: 'O‘qituvchining UUID identifikatori', type: String })
   @ApiResponse({ status: 200, description: 'O‘qituvchi ma‘lumotlari', type: teachers })
@@ -37,6 +45,8 @@ export class TeachersController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'O‘qituvchi ma‘lumotlarini yangilash' })
   @ApiParam({ name: 'id', description: 'O‘qituvchining UUID identifikatori', type: String })
   @ApiBody({ type: UpdateTeacherDto })
@@ -48,6 +58,8 @@ export class TeachersController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'O‘qituvchini o‘chirish' })
   @ApiParam({ name: 'id', description: 'O‘qituvchining UUID identifikatori', type: String })

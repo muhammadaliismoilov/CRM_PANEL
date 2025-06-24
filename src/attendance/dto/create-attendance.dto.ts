@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNotEmpty, IsBoolean } from 'class-validator';
+import { IsUUID, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateAttendanceDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'Talaba ID’si' })
@@ -14,6 +14,7 @@ export class CreateAttendanceDto {
 
   @ApiProperty({ example: true, description: 'Davomat holati (true - hozir, false - yo‘q)' })
   @IsBoolean()
+  @IsOptional()
   @IsNotEmpty()
   present: boolean;
 }

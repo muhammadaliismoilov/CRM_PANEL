@@ -1,16 +1,20 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import{UpdatePaymentDto} from './dto/update-payment.dto'
 import { payments } from './payment.model';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/guards/roles.decarator';
 
 @ApiTags('payments')
 @Controller('payments')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post()
+  @Post("/create")
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Yangi to‘lov qo‘shish' })
   @ApiResponse({ status: 201, description: 'To‘lov muvaffaqiyatli qo‘shildi', type: payments })
@@ -20,14 +24,18 @@ export class PaymentController {
     return this.paymentService.create(createPaymentDto);
   }
 
-  @Get()
+  @Get("/getAll")
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Barcha to‘lovlarni olish' })
   @ApiResponse({ status: 200, description: 'To‘lovlar ro‘yxati', type: [payments] })
   async findAll(): Promise<payments[]> {
     return this.paymentService.findAll();
   }
 
-  @Get(':id')
+  @Get('/getOne/:id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'ID bo‘yicha to‘lovni olish' })
   @ApiParam({ name: 'id', description: 'To‘lovning UUID identifikatori', type: String })
   @ApiResponse({ status: 200, description: 'To‘lov ma‘lumotlari', type: payments })
@@ -37,6 +45,8 @@ export class PaymentController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'To‘lov ma‘lumotlarini yangilash' })
   @ApiParam({ name: 'id', description: 'To‘lovning UUID identifikatori', type: String })
   @ApiBody({ type: UpdatePaymentDto })
@@ -47,6 +57,8 @@ export class PaymentController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+  @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'To‘lovni o‘chirish' })
   @ApiParam({ name: 'id', description: 'To‘lovning UUID identifikatori', type: String })

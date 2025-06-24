@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, Length, Matches, IsOptional } from 'class-validator';
 import { Role } from '../admins.model';
 
 export class UpdateAdminDto {
@@ -24,5 +24,6 @@ export class UpdateAdminDto {
   password?: string;
 
   @ApiProperty({ example: Role.SUPERADMIN, description: 'Rol', enum: Role, required: false })
+  @IsOptional()
   role?: Role;
 }

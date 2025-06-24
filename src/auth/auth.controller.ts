@@ -2,7 +2,7 @@ import { Controller, Post, Body, Res, HttpCode, HttpStatus, Get, Req, UseGuards 
 import { AuthService } from './auth.service';
 import { CreateAdminDto } from '../admins/dto/create-admin.dto';
 import { Response } from 'express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt'; // JwtService ni injekt qilish
 
@@ -14,7 +14,7 @@ export class AuthController {
     private jwtService: JwtService, // JwtService ni qo‘shish
   ) {}
 
-  @Post('login')
+  @Post('/login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ status: 200, description: 'Successfully logged in', schema: { example: { id: 'uuid', login: 'ali_admin', role: 'admin', accessToken: 'jwt-token', refreshToken: 'jwt-token' } } })
@@ -40,12 +40,11 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 kun
     });
 
-    return { id, login: userLogin, role, accessToken, refreshToken };
+    return { id, login: userLogin, role, accessToken };
   }
 
-  @Get('logout')
+  @Get('/logout')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Logout user' })
   @ApiResponse({ status: 200, description: 'Successfully logged out', schema: { example: { message: 'Successfully logged out' } } })
   async logout(@Res({ passthrough: true }) res: Response) {

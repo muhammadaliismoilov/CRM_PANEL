@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, Length, Matches, IsOptional } from 'class-validator';
 import { Role } from '../admins.model';
 export class CreateAdminDto {
   @ApiProperty({ example: 'Ali Valiev', description: 'Adminning to‘liq ismi' })
@@ -25,6 +25,7 @@ export class CreateAdminDto {
   @IsNotEmpty()
   password: string;
 
-  @ApiProperty({ example: Role.ADMIN, description: 'Rol (default: ADMIN)', enum: Role, required: false })
+  @ApiProperty({ example: Role.ADMIN, description: 'Rol (default: ADMIN)', enum: Role ,default:Role.ADMIN, required: false })
+  @IsOptional()
   role?: Role;
 }

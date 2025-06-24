@@ -1,16 +1,20 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { CreateStudentDto} from './dto/create-student.dto';
 import{UpdateStudentDto } from './dto/update-student.dto'
 import { students } from './student.model';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/guards/roles.decarator';
 
 @ApiTags('students')
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
-  @Post()
+  @Post("/create")
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Yangi talaba yaratish' })
   @ApiResponse({ status: 201, description: 'Talaba muvaffaqiyatli yaratildi', type: students })
@@ -20,7 +24,9 @@ export class StudentsController {
     return this.studentsService.create(createStudentDto);
   }
 
-  @Get()
+  @Get("/getAll")
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Barcha talabalarni olish' })
   @ApiResponse({ status: 200, description: 'Talabalar ro‘yxati', type: [students] })
   async findAll(): Promise<students[]> {
@@ -28,6 +34,8 @@ export class StudentsController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'ID bo‘yicha talabani olish' })
   @ApiParam({ name: 'id', description: 'Talabaning UUID identifikatori', type: String })
   @ApiResponse({ status: 200, description: 'Talaba ma‘lumotlari', type: students })
@@ -37,6 +45,8 @@ export class StudentsController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @ApiOperation({ summary: 'Talaba ma‘lumotlarini yangilash' })
   @ApiParam({ name: 'id', description: 'Talabaning UUID identifikatori', type: String })
   @ApiBody({ type: UpdateStudentDto })
@@ -48,6 +58,8 @@ export class StudentsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
+    @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Talabani o‘chirish' })
   @ApiParam({ name: 'id', description: 'Talabaning UUID identifikatori', type: String })

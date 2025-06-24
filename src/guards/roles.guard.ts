@@ -1,25 +1,23 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
-import { JwtStrategy } from './jwt.strategy';
-import { Role } from '../admins/admins.model'; // Role enum admins.model.ts dan olinadi
+import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
+import { ROLES_KEY } from "./roles.decarator";
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<Role>('roles', context.getHandler());
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()]
+    );
     if (!requiredRoles) {
-      return true; // Agar rollar talab qilinmasa, ruxsat beriladi
+      return true;
     }
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    
-    if (!user || !user.role) {
-      return false; // Foydalanuvchi yoki roli mavjud emas
-    }
 
-    return requiredRoles.includes(user?.role); // Foydalanuvchi roli talab qilingan rollar ro‘yxatida bor yoki yo‘qligini tekshiradi
+    return requiredRoles.some((role) => user?.role === role);
   }
 }
