@@ -1,32 +1,36 @@
-import { IsNotEmpty, IsString, IsEnum, IsOptional, IsUUID, Matches, Length } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, Length } from 'class-validator';
 import { Role } from '../teachers.model';
 
 export class CreateTeacherDto {
-  @IsNotEmpty({ message: 'To‘liq ism kiritilishi shart' })
-  @IsString({ message: 'To‘liq ism satr bo‘lishi kerak' })
-  @Length(1, 255, { message: 'To‘liq ism 1 dan 255 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'Ali Valiev', description: 'O‘qituvchining to‘liq ismi' })
+  @IsString()
+  @IsNotEmpty()
   fullName: string;
 
-  @IsNotEmpty({ message: 'Telefon raqami kiritilishi shart' })
-  @IsString({ message: 'Telefon raqami satr bo‘lishi kerak' })
-  number: string;
+  @ApiProperty({ example: '+998901234567', description: 'O‘qituvchining telefon raqami' })
+  @IsString()
+  @IsNotEmpty()
+  phoneNumber: string;
 
-  @IsNotEmpty({ message: 'Login kiritilishi shart' })
-  @IsString({ message: 'Login satr bo‘lishi kerak' })
-  @Length(3, 50, { message: 'Login 3 dan 50 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'ali_valiev', description: 'O‘qituvchining login nomi (maks. 50 belgigacha)' })
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 50)
   login: string;
 
-  @IsNotEmpty({ message: 'Parol kiritilishi shart' })
-  @IsString({ message: 'Parol satr bo‘lishi kerak' })
-  @Length(6, 255, { message: 'Parol 6 dan 255 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'password123', description: 'O‘qituvchining paroli' })
+  @IsString()
+  @IsNotEmpty()
   password: string;
 
+  @ApiProperty({ enum: Role, example: Role.TEACHER, description: 'O‘qituvchining roli' })
+  @IsEnum(Role)
   @IsOptional()
-  @IsEnum(Role, { message: 'Rol teacher, admin yoki superadmin bo‘lishi kerak' })
-  role: Role;
+  role?: Role;
 
+  @ApiProperty({ example: 'http://example.com/image.jpg', description: 'O‘qituvchining rasm URL manzili', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Rasm satr bo‘lishi kerak' })
-  @Length(0, 255, { message: 'Rasm URL 0 dan 255 belgigacha bo‘lishi kerak' })
   img?: string;
 }

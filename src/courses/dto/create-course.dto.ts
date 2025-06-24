@@ -1,30 +1,25 @@
-import { IsNotEmpty, IsString, IsPhoneNumber, IsOptional, Length } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, Length, IsUUID } from 'class-validator';
 
-// Kurs yaratish uchun ma'lumotlar tuzilmasi (DTO)
 export class CreateCourseDto {
-  // Kurs nomi majburiy bo‘lib, satr bo‘lishi va 1-255 belgi oralig‘ida bo‘lishi kerak
-  @IsNotEmpty({ message: 'Kurs nomi kiritilishi shart' })
-  @IsString({ message: 'Kurs nomi satr bo‘lishi kerak' })
-  @Length(1, 255, { message: 'Kurs nomi 1 dan 255 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'Matematika', description: 'Kurs nomi' })
+  @IsString()
+  @IsNotEmpty()
   courseName: string;
 
-  // Dars kunlari majburiy bo‘lib, satr bo‘lishi va 1-255 belgi oralig‘ida bo‘lishi kerak
-  @IsNotEmpty({ message: 'Dars kunlari kiritilishi shart' })
-  @IsString({ message: 'Dars kunlari satr bo‘lishi kerak' })
-  @Length(1, 255, { message: 'Dars kunlari 1 dan 255 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'Dushanba, Chorshanba, Juma', description: 'Dars kunlari' })
+  @IsString()
+  @IsNotEmpty()
   lessonDays: string;
 
-  // Dars vaqti majburiy bo‘lib, satr bo‘lishi va 1-50 belgi oralig‘ida bo‘lishi kerak
-  @IsNotEmpty({ message: 'Dars vaqti kiritilishi shart' })
-  @IsString({ message: 'Dars vaqti satr bo‘lishi kerak' })
-  @Length(1, 50, { message: 'Dars vaqti 1 dan 50 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: '10:00-12:00', description: 'Dars vaqti (maks. 50 belgigacha)' })
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 50)
   lessonTime: string;
 
-  // O‘qituvchi ismi majburiy bo‘lib, satr bo‘lishi va 1-255 belgi oralig‘ida bo‘lishi kerak
-  @IsNotEmpty({ message: 'O‘qituvchi ID kiritilishi shart' })
-  @IsString({ message: 'O‘qituvchi ID satr bo‘lishi kerak' })
-  @Length(1, 255, { message: 'O‘qituvchi ID 1 dan 255 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'O‘qituvchi ID’si' })
+  @IsUUID()
+  @IsNotEmpty()
   teacherId: string;
-
-  
 }

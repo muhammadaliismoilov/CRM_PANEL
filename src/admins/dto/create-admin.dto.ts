@@ -1,24 +1,30 @@
-import { IsNotEmpty, IsString, IsEnum, Matches, Length } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, Length, Matches } from 'class-validator';
 import { Role } from '../admins.model';
-
 export class CreateAdminDto {
-  @IsNotEmpty({ message: 'To‘liq ism kiritilishi shart' })
-  @IsString({ message: 'To‘liq ism satr bo‘lishi kerak' })
-  @Length(1, 255, { message: 'To‘liq ism 1 dan 255 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'Ali Valiev', description: 'Adminning to‘liq ismi' })
+  @IsString()
+  @IsNotEmpty()
   fullName: string;
 
-  @IsNotEmpty({ message: 'Telefon raqami kiritilishi shart' })
-  @IsString({ message: 'Telefon raqami satr bo‘lishi kerak' })
+  @ApiProperty({ example: '+998901234567', description: 'Telefon raqami' })
+  @IsString()
+  @IsNotEmpty()
+  @Length(10, 20)
+  @Matches(/^\+998[0-9]{9}$/, { message: 'Telefon raqami +998 bilan boshlanishi va 9 raqamdan iborat bo‘lishi kerak' })
   phoneNumber: string;
 
-  @IsNotEmpty({ message: 'Login kiritilishi shart' })
-  @IsString({ message: 'Login satr bo‘lishi kerak' })
-  @Length(3, 50, { message: 'Login 3 dan 50 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'ali_admin', description: 'Login (maks. 50 belgi)' })
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 50)
   login: string;
 
-  @IsNotEmpty({ message: 'Parol kiritilishi shart' })
-  @IsString({ message: 'Parol satr bo‘lishi kerak' })
-  @Length(6, 255, { message: 'Parol 6 dan 255 belgigacha bo‘lishi kerak' })
+  @ApiProperty({ example: 'password123', description: 'Parol' })
+  @IsString()
+  @IsNotEmpty()
   password: string;
 
+  @ApiProperty({ example: Role.ADMIN, description: 'Rol (default: ADMIN)', enum: Role, required: false })
+  role?: Role;
 }

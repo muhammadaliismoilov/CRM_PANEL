@@ -1,19 +1,12 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { JwtModule } from '@nestjs/jwt';
-import { AdminsService } from './admins.service';
-import { AdminsController } from './admins.controller';
+import { AdminService } from './admins.service';
+import { AdminController } from './admins.controller';
 import { admins } from './admins.model';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([admins]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '15m' },
-    }),
-  ],
-  providers: [AdminsService],
-  controllers: [AdminsController],
+  imports: [SequelizeModule.forFeature([admins])],
+  controllers: [AdminController],
+  providers: [AdminService],
 })
-export class AdminsModule {}
+export class AdminModule {}

@@ -1,22 +1,13 @@
-import {
-  Table,
-  Column,
-  Model,
-  DataType,
-  PrimaryKey,
-  Default,
-  CreatedAt,
-  UpdatedAt,
-} from "sequelize-typescript";
-import { v4 as uuidv4 } from "uuid";
+import { Table, Column, Model, DataType, PrimaryKey, Default, CreatedAt, UpdatedAt } from 'sequelize-typescript';
+import { v4 as uuidv4 } from 'uuid';
 
 export enum Role {
-  TEACHER = "teacher",
-  ADMIN = "admin",
-  SUPERADMIN = "superadmin",
+  STUDENT = 'student',
+  TEACHER = 'teacher',
+  ADMIN = 'admin',
+  SUPERADMIN = 'superadmin',
 }
-
-@Table({ tableName: "admins" })
+@Table({ tableName: 'admins' })
 export class admins extends Model {
   @PrimaryKey
   @Default(() => uuidv4())
@@ -33,13 +24,13 @@ export class admins extends Model {
   fullName: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.STRING(20),
     allowNull: false,
   })
   phoneNumber: string;
 
   @Column({
-    type: DataType.STRING,
+    type: DataType.STRING(50),
     allowNull: false,
   })
   login: string;

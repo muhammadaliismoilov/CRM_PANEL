@@ -1,32 +1,25 @@
-import { IsString, IsPhoneNumber, IsOptional, Length } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, Length, IsUUID } from 'class-validator';
 
 export class UpdateCourseDto {
+  @ApiProperty({ example: 'Matematika', description: 'Kurs nomi', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Course name must be a string' })
-  @Length(1, 255, { message: 'Course name must be between 1 and 255 characters' })
   courseName?: string;
 
+  @ApiProperty({ example: 'Dushanba, Chorshanba, Juma', description: 'Dars kunlari', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Lesson days must be a string' })
-  @Length(1, 255, { message: 'Lesson days must be between 1 and 255 characters' })
   lessonDays?: string;
 
+  @ApiProperty({ example: '10:00-12:00', description: 'Dars vaqti (maks. 50 belgigacha)', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Lesson time must be a string' })
-  @Length(1, 50, { message: 'Lesson time must be between 1 and 50 characters' })
+  @Length(1, 50)
   lessonTime?: string;
 
+  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000', description: 'O‘qituvchi ID’si', required: false })
+  @IsUUID()
   @IsOptional()
-  @IsString({ message: 'Teacher name must be a string' })
-  @Length(1, 255, { message: 'Teacher name must be between 1 and 255 characters' })
-  teacherName?: string;
-
-  @IsOptional()
-  @IsPhoneNumber('UZ', { message: 'Invalid phone number format for Uzbekistan' })
-  teacherPhoneNumber?: string;
-
-  @IsOptional()
-  @IsString({ message: 'Teacher image must be a string' })
-  @Length(0, 255, { message: 'Teacher image must be between 0 and 255 characters' })
-  teacherImg?: string;
+  teacherId?: string;
 }

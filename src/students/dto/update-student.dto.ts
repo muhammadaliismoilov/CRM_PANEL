@@ -1,52 +1,54 @@
-import { IsString, IsPhoneNumber, IsOptional, Length, IsEnum } from 'class-validator';
-
-export enum StudentRole {
-  STUDENT = 'student',
-  TEACHER = 'teacher',
-  ADMIN = 'admin',
-  SUPERADMIN = 'superadmin',
-}
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsBoolean, Length } from 'class-validator';
+import { Role } from '../student.model';
 
 
 export class UpdateStudentDto {
+  @ApiProperty({ example: 'Azizbek Karimov', description: 'Talabaning to‘liq ismi', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Name must be a string' })
-  @Length(1, 255, { message: 'Name must be between 1 and 255 characters' })
   name?: string;
 
+  @ApiProperty({ example: 'azizbek_karimov', description: 'Talabaning login nomi (maks. 50 belgigacha)', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Login must be a string' })
-  @Length(1, 255, { message: 'Login must be between 1 and 255 characters' })
+  @Length(1, 50)
   login?: string;
 
+  @ApiProperty({ example: 'newpassword123', description: 'Talabaning yangi paroli', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Password must be a string' })
-  @Length(1, 255, { message: 'Password must be between 1 and 255 characters' })
   password?: string;
 
+  @ApiProperty({ example: '+998901234567', description: 'Talabaning telefon raqami', required: false })
+  @IsString()
   @IsOptional()
-  @IsPhoneNumber('UZ', { message: 'Invalid phone number format for Uzbekistan' })
+  @Length(1, 20)
   phoneNumber?: string;
 
+  @ApiProperty({ example: 'Karimjon Abdullaev', description: 'Ota-onaning ismi', required: false })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Parent name must be a string' })
-  @Length(1, 255, { message: 'Parent name must be between 1 and 255 characters' })
   parentName?: string;
 
+  @ApiProperty({ example: '+998907654321', description: 'Ota-onaning telefon raqami', required: false })
+  @IsString()
   @IsOptional()
-  @IsPhoneNumber('UZ', { message: 'Invalid phone number format for Uzbekistan' })
+  @Length(1, 20)
   parentPhoneNumber?: string;
 
+  @ApiProperty({ example: 'http://example.com/newimage.jpg', description: 'Talabaning rasm URL manzili', required: true })
+  @IsString()
   @IsOptional()
-  @IsString({ message: 'Image must be a string' })
-  @Length(0, 255, { message: 'Image must be between 0 and 255 characters' })
   img?: string;
 
+  @ApiProperty({ enum: Role, example: Role.STUDENT, description: 'Talabaning roli',default:Role.STUDENT, required: true })
+  @IsEnum(Role)
   @IsOptional()
-  @IsEnum(StudentRole, { message: 'Invalid role value' })
-  role?: StudentRole;
+  role?: Role;
 
+  @ApiProperty({ example: true, description: 'To‘lov holati',default:false, required: true })
+  @IsBoolean()
   @IsOptional()
-  @IsString({ message: 'Course ID must be a string' })
-  courseId?: string;
+  isPaid?: boolean;
 }

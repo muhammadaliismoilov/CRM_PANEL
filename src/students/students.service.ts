@@ -1,73 +1,73 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { student } from './student.model';
-import { CreateStudentDto } from './dto/create-student.dto';
-import { UpdateStudentDto } from './dto/update-student.dto';
+import { students } from '../students/student.model';
+import { CreateStudentDto} from './dto/create-student.dto';
+import{UpdateStudentDto } from './dto/update-student.dto'
+import { courses } from '../courses/courses.model';
+import { payments } from '../payment/payment.model';
+import { attendances } from '../attendance/attendance.model';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class StudentService {
+export class StudentsService {
   constructor(
-    @InjectModel(student)
-    private studentModel: typeof student,
+    @InjectModel(students)
+    private studentModel: typeof students,
   ) {}
 
-  async create(createStudentDto: CreateStudentDto): Promise<{ student: student; message: string }> {
+  async create(createStudentDto: CreateStudentDto): Promise<students> {
     try {
-      const foundStudent = await this.studentModel.findOne({ where: { login: createStudentDto.login } });
-      if (foundStudent) {
-        throw new BadRequestException(`"${foundStudent.dataValues.login}" login bilan talaba bazada mavjud`);
-      }
-
-      const student = await this.studentModel.create(createStudentDto as any);
-      return { student, message: 'Talaba muvaffaqiyatli yaratildi' };
+      createStudentDto.password = await bcrypt.hash(createStudentDto.password, 10);
+      return await this.studentModel.create(createStudentDto as any);
     } catch (error) {
-      throw new BadRequestException(`Talaba yaratishda xatolik: ${error.message}`);
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new ConflictException('Bu login allaqachon ishlatilgan');
+      }
+      throw error;
     }
   }
 
-  async findAll(): Promise<student[]> {
+  async findAll(): Promise<students[]> {
+    return this.studentModel.findAll({
+      include: [
+        { model: courses, as: 'courses' },
+        { model: payments, as: 'payments' },
+        { model: attendances, as: 'attendances' },
+      ],
+    });
+  }
+
+  async findOne(id: string): Promise<students> {
+    const student = await this.studentModel.findByPk(id, {
+      include: [
+        { model: courses, as: 'courses' },
+        { model: payments, as: 'payments' },
+        { model: attendances, as: 'attendances' },
+      ],
+    });
+    if (!student) {
+      throw new NotFoundException(`ID ${id} bo‘yicha talaba topilmadi`);
+    }
+    return student;
+  }
+
+  async update(id: string, updateStudentDto: UpdateStudentDto): Promise<students> {
+    const student = await this.findOne(id);
     try {
-      return await this.studentModel.findAll();
+      if (updateStudentDto.password) {
+        updateStudentDto.password = await bcrypt.hash(updateStudentDto.password, 10);
+      }
+      return await student.update(updateStudentDto);
     } catch (error) {
-      throw new BadRequestException(`Talabalarni olishda xatolik: ${error.message}`);
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        throw new ConflictException('Bu login allaqachon ishlatilgan');
+      }
+      throw error;
     }
   }
 
-  async findOne(id: number): Promise<{ student: student | null; message: string }> {
-    try {
-      const student = await this.studentModel.findByPk(id);
-      if (!student) {
-        throw new BadRequestException(`Talaba topilmadi: ID ${id}`);
-      }
-      return { student, message: 'Talaba muvaffaqiyatli topildi' };
-    } catch (error) {
-      throw new BadRequestException(`Bitta talabani olishda xatolik: ${error.message}`);
-    }
-  }
-
-  async update(id: number, updateStudentDto: UpdateStudentDto): Promise<{ student: student | null; message: string }> {
-    try {
-      const student = await this.studentModel.findByPk(id);
-      if (!student) {
-        throw new BadRequestException(`Talaba topilmadi: ID ${id}`);
-      }
-      await student.update(updateStudentDto as any);
-      return { student, message: 'Talaba ma\'lumotlari muvaffaqiyatli yangilandi' };
-    } catch (error) {
-      throw new BadRequestException(`Talaba ma\'lumotlarini yangilashda xatolik: ${error.message}`);
-    }
-  }
-
-  async delete(id: number): Promise<{ message: string }> {
-    try {
-      const student = await this.studentModel.findByPk(id);
-      if (!student) {
-        throw new BadRequestException(`Talaba topilmadi: ID ${id}`);
-      }
-      await student.destroy();
-      return { message: 'Talaba muvaffaqiyatli o‘chirildi' };
-    } catch (error) {
-      throw new BadRequestException(`Talabani o‘chirishda xatolik: ${error.message}`);
-    }
+  async remove(id: string): Promise<void> {
+    const student = await this.findOne(id);
+    await student.destroy();
   }
 }
