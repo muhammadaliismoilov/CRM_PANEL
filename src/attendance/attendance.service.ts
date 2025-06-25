@@ -6,6 +6,20 @@ import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { students } from '../students/student.model';
 import { courses } from '../courses/courses.model';
 
+interface PaginationOptions {
+  page: number;
+  limit: number;
+}
+
+interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
+
 @Injectable()
 export class AttendanceService {
   constructor(
@@ -30,19 +44,49 @@ export class AttendanceService {
     if (!course) {
       throw new NotFoundException(`ID ${courseId} bo‘yicha kurs topilmadi`);
     }
-    if(student && course){
-      throw new BadRequestException("Siz yo`lamadan o`tgansiz")
+
+    // Agar talaba allaqachon ushbu kurs uchun davomat qayd etgan bo‘lsa, xatolik qaytarish
+    const existingAttendance = await this.attendanceModel.findOne({ where: { studentId, courseId } });
+    if (existingAttendance) {
+      throw new BadRequestException('Siz ushbu kurs uchun allaqachon davomat qayd etgansiz');
     }
+
     return await this.attendanceModel.create(createAttendanceDto as any);
   }
 
-  async findAll(): Promise<attendances[]> {
-    return this.attendanceModel.findAll({
+  async findAll({ page = 1, limit = 5 }: PaginationOptions) {
+    const offset = (page - 1) * limit;
+    const attendances = await this.attendanceModel.findAndCountAll({
+      limit,
+      offset,
       include: [
         { model: students, as: 'student' },
         { model: courses, as: 'course' },
       ],
+      order: [['createdAt', 'DESC']],
     });
+
+    if (!attendances.rows.length) {
+      throw new NotFoundException('No attendances found');
+    }
+
+    const totalPages = Math.ceil(attendances.count / limit);
+    const hasPrevious = page > 1;
+    const hasNext = page < totalPages;
+
+    const meta: PaginationMeta = {
+      currentPage: page,
+      totalPages,
+      totalItems: attendances.count,
+      itemsPerPage: limit,
+      hasPrevious,
+      hasNext,
+    };
+
+    return {
+      data: attendances.rows,
+      meta,
+    };
   }
 
   async findOne(id: string): Promise<attendances> {

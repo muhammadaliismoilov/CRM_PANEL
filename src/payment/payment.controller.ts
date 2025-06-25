@@ -1,69 +1,60 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
-import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import{UpdatePaymentDto} from './dto/update-payment.dto'
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, HttpCode, HttpStatus } from '@nestjs/common';
+import { PaginationMeta, PaymentService } from './payment.service';
 import { payments } from './payment.model';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Roles } from 'src/guards/roles.decarator';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('payments')
 @Controller('payments')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
-  @Post("/create")
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin', 'superadmin')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Yangi to‘lov qo‘shish' })
-  @ApiResponse({ status: 201, description: 'To‘lov muvaffaqiyatli qo‘shildi', type: payments })
-  @ApiResponse({ status: 404, description: 'Talaba, kurs yoki o‘qituvchi topilmadi' })
-  @ApiBody({ type: CreatePaymentDto })
-  async create(@Body() createPaymentDto: CreatePaymentDto): Promise<payments> {
-    return this.paymentService.create(createPaymentDto);
-  }
-
   @Get("/getAll")
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin', 'superadmin')
-  @ApiOperation({ summary: 'Barcha to‘lovlarni olish' })
-  @ApiResponse({ status: 200, description: 'To‘lovlar ro‘yxati', type: [payments] })
-  async findAll(): Promise<payments[]> {
-    return this.paymentService.findAll();
+  @ApiOperation({ summary: 'Get all payments with pagination' })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
+  @ApiResponse({ status: 200, description: 'List of payments', schema: { example: { data: [{ id: 'uuid', studentId: 'uuid', courseId: 'uuid', teacherId: 'uuid', studentPhoneNumber: '+998901234567', createdAt: '2025-06-25T10:21:00Z', updatedAt: '2025-06-25T10:21:00Z' }], meta: { currentPage: 1, totalPages: 3, totalItems: 11, itemsPerPage: 5, hasPrevious: false, hasNext: true } } } })
+  @ApiResponse({ status: 404, description: 'No payments found' })
+  async findAll(@Query('page') page: number = 1): Promise<{ data: payments[]; meta: PaginationMeta }> {
+    return this.paymentService.findAll({ page, limit: 5 });
   }
 
-  @Get('/getOne/:id')
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin', 'superadmin')
-  @ApiOperation({ summary: 'ID bo‘yicha to‘lovni olish' })
-  @ApiParam({ name: 'id', description: 'To‘lovning UUID identifikatori', type: String })
-  @ApiResponse({ status: 200, description: 'To‘lov ma‘lumotlari', type: payments })
-  @ApiResponse({ status: 404, description: 'To‘lov topilmadi' })
+  @Get(':id')
+  @ApiOperation({ summary: 'Get payment by ID' })
+  @ApiParam({ name: 'id', description: 'Payment UUID', type: String })
+  @ApiResponse({ status: 200, description: 'Payment details', type: payments })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
   async findOne(@Param('id') id: string): Promise<payments> {
     return this.paymentService.findOne(id);
   }
 
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new payment' })
+  @ApiBody({ type: CreatePaymentDto })
+  @ApiResponse({ status: 201, description: 'Payment created', type: payments })
+  @ApiResponse({ status: 400, description: 'Already paid or invalid data' })
+  @ApiResponse({ status: 404, description: 'Student, course, or teacher not found' })
+  async create(@Body() createPaymentDto: CreatePaymentDto): Promise<payments> {
+    return this.paymentService.create(createPaymentDto);
+  }
+
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin', 'superadmin')
-  @ApiOperation({ summary: 'To‘lov ma‘lumotlarini yangilash' })
-  @ApiParam({ name: 'id', description: 'To‘lovning UUID identifikatori', type: String })
+  @ApiOperation({ summary: 'Update payment by ID' })
+  @ApiParam({ name: 'id', description: 'Payment UUID', type: String })
   @ApiBody({ type: UpdatePaymentDto })
-  @ApiResponse({ status: 200, description: 'To‘lov muvaffaqiyatli yangilandi', type: payments })
-  @ApiResponse({ status: 404, description: 'To‘lov yoki bog‘liq ma‘lumotlar topilmadi' })
+  @ApiResponse({ status: 200, description: 'Payment updated', type: payments })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
   async update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto): Promise<payments> {
     return this.paymentService.update(id, updatePaymentDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-  @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'To‘lovni o‘chirish' })
-  @ApiParam({ name: 'id', description: 'To‘lovning UUID identifikatori', type: String })
-  @ApiResponse({ status: 204, description: 'To‘lov muvaffaqiyatli o‘chirildi' })
-  @ApiResponse({ status: 404, description: 'To‘lov topilmadi' })
+  @ApiOperation({ summary: 'Delete payment by ID' })
+  @ApiParam({ name: 'id', description: 'Payment UUID', type: String })
+  @ApiResponse({ status: 204, description: 'Payment deleted' })
+  @ApiResponse({ status: 404, description: 'Payment not found' })
   async remove(@Param('id') id: string): Promise<void> {
     return this.paymentService.remove(id);
   }

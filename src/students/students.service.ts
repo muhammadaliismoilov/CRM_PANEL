@@ -1,12 +1,26 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { students } from '../students/student.model';
-import { CreateStudentDto} from './dto/create-student.dto';
-import{UpdateStudentDto } from './dto/update-student.dto'
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
 import { courses } from '../courses/courses.model';
 import { payments } from '../payment/payment.model';
 import { attendances } from '../attendance/attendance.model';
 import * as bcrypt from 'bcrypt';
+
+interface PaginationOptions {
+  page: number;
+  limit: number;
+}
+
+interface PaginationMeta {
+  currentPage: number;
+  totalPages: number;
+  totalItems: number;
+  itemsPerPage: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
 
 @Injectable()
 export class StudentsService {
@@ -27,14 +41,40 @@ export class StudentsService {
     }
   }
 
-  async findAll(): Promise<students[]> {
-    return this.studentModel.findAll({
+  async findAll({ page = 1, limit = 5 }: PaginationOptions) {
+    const offset = (page - 1) * limit;
+    const students = await this.studentModel.findAndCountAll({
+      limit,
+      offset,
       include: [
         { model: courses, as: 'courses' },
         { model: payments, as: 'payments' },
         { model: attendances, as: 'attendances' },
       ],
+      order: [['createdAt', 'DESC']],
     });
+
+    if (!students.rows.length) {
+      throw new NotFoundException('No students found');
+    }
+
+    const totalPages = Math.ceil(students.count / limit);
+    const hasPrevious = page > 1;
+    const hasNext = page < totalPages;
+
+    const meta: PaginationMeta = {
+      currentPage: page,
+      totalPages,
+      totalItems: students.count,
+      itemsPerPage: limit,
+      hasPrevious,
+      hasNext,
+    };
+
+    return {
+      data: students.rows,
+      meta,
+    };
   }
 
   async findOne(id: string): Promise<students> {

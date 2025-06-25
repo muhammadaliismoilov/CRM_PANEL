@@ -12,6 +12,12 @@ export class TelegramService implements OnModuleInit {
 
   onModuleInit() {
     this.bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
+    try {
+      this.bot.setMyCommands([
+        { command: '/start', description: 'Buyurtma berish' },
+        { command: '/shikoyat ', description: 'Shikoyat jonatishi uchun' },
+
+      ]);
 
     this.bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
@@ -50,5 +56,8 @@ export class TelegramService implements OnModuleInit {
 
       this.userState.set(chatId, state);
     });
+    } catch (error) {
+      console.error('Telegram bot initialization error:', error);
+    }
   }
 }

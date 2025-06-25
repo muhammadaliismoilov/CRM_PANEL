@@ -5,6 +5,7 @@ import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { JwtService } from '@nestjs/jwt'; // JwtService ni injekt qilish
+import { loginDto } from 'src/admins/dto/login-dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -19,7 +20,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Login user' })
   @ApiResponse({ status: 200, description: 'Successfully logged in', schema: { example: { id: 'uuid', login: 'ali_admin', role: 'admin', accessToken: 'jwt-token', refreshToken: 'jwt-token' } } })
   @ApiResponse({ status: 401, description: 'Invalid login or password' })
-  @ApiBody({ type: CreateAdminDto })
+  @ApiBody({ type: loginDto })
   async login(
     @Body() { login, password }: { login: string; password: string },
     @Res({ passthrough: true }) res: Response,

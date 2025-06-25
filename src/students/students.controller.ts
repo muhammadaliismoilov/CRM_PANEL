@@ -1,70 +1,62 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { CreateStudentDto} from './dto/create-student.dto';
-import{UpdateStudentDto } from './dto/update-student.dto'
 import { students } from './student.model';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Roles } from 'src/guards/roles.decarator';
+import { CreateStudentDto } from './dto/create-student.dto';
+import { UpdateStudentDto } from './dto/update-student.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('students')
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
-  @Post("/create")
-  @UseGuards(JwtAuthGuard)
-    @Roles('admin', 'superadmin')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Yangi talaba yaratish' })
-  @ApiResponse({ status: 201, description: 'Talaba muvaffaqiyatli yaratildi', type: students })
-  @ApiResponse({ status: 409, description: 'Login allaqachon ishlatilgan' })
-  @ApiBody({ type: CreateStudentDto })
-  async create(@Body() createStudentDto: CreateStudentDto): Promise<students> {
-    return this.studentsService.create(createStudentDto);
-  }
-
   @Get("/getAll")
-  @UseGuards(JwtAuthGuard)
-    @Roles('admin', 'superadmin')
-  @ApiOperation({ summary: 'Barcha talabalarni olish' })
-  @ApiResponse({ status: 200, description: 'Talabalar ro‘yxati', type: [students] })
-  async findAll(): Promise<students[]> {
-    return this.studentsService.findAll();
+  @ApiOperation({ summary: 'Get all students with pagination' })
+  @ApiQuery({ name: 'page', required: false, type: 'number', description: 'Page number (default: 1)' })
+  @ApiResponse({ status: 200, description: 'List of students', schema: { example: { data: [{ id: 'uuid', name: 'Ali', login: 'ali_student', phoneNumber: '+998901234567', parentName: 'Vali', parentPhoneNumber: '+998912345678', role: 'student', isPaid: false, createdAt: '2025-06-25T10:28:00Z', updatedAt: '2025-06-25T10:28:00Z' }], meta: { currentPage: 1, totalPages: 3, totalItems: 11, itemsPerPage: 5, hasPrevious: false, hasNext: true } } } })
+  @ApiResponse({ status: 404, description: 'No students found' })
+  async findAll(
+    @Query('page') page: number = 1
+  ): Promise<{ data: students[]; meta: { currentPage: number; totalPages: number; totalItems: number; itemsPerPage: number; hasPrevious: boolean; hasNext: boolean } }> {
+    return this.studentsService.findAll({ page, limit: 5 });
   }
 
-  @Get(':id')
-  @UseGuards(JwtAuthGuard)
-    @Roles('admin', 'superadmin')
-  @ApiOperation({ summary: 'ID bo‘yicha talabani olish' })
-  @ApiParam({ name: 'id', description: 'Talabaning UUID identifikatori', type: String })
-  @ApiResponse({ status: 200, description: 'Talaba ma‘lumotlari', type: students })
-  @ApiResponse({ status: 404, description: 'Talaba topilmadi' })
+  @Get('/getOne:id')
+  @ApiOperation({ summary: 'Get student by ID' })
+  @ApiParam({ name: 'id', description: 'Student UUID', type: String })
+  @ApiResponse({ status: 200, description: 'Student details', type: students })
+  @ApiResponse({ status: 404, description: 'Student not found' })
   async findOne(@Param('id') id: string): Promise<students> {
     return this.studentsService.findOne(id);
   }
 
+  @Post("/create")
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new student' })
+  @ApiBody({ type: CreateStudentDto })
+  @ApiResponse({ status: 201, description: 'Student created', type: students })
+  @ApiResponse({ status: 409, description: 'Login already exists' })
+  async create(@Body() createStudentDto: CreateStudentDto): Promise<students> {
+    return this.studentsService.create(createStudentDto);
+  }
+
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
-    @Roles('admin', 'superadmin')
-  @ApiOperation({ summary: 'Talaba ma‘lumotlarini yangilash' })
-  @ApiParam({ name: 'id', description: 'Talabaning UUID identifikatori', type: String })
+  @ApiOperation({ summary: 'Update student by ID' })
+  @ApiParam({ name: 'id', description: 'Student UUID', type: String })
   @ApiBody({ type: UpdateStudentDto })
-  @ApiResponse({ status: 200, description: 'Talaba muvaffaqiyatli yangilandi', type: students })
-  @ApiResponse({ status: 404, description: 'Talaba topilmadi' })
-  @ApiResponse({ status: 409, description: 'Login allaqachon ishlatilgan' })
+  @ApiResponse({ status: 200, description: 'Student updated', type: students })
+  @ApiResponse({ status: 404, description: 'Student not found' })
+  @ApiResponse({ status: 409, description: 'Login already exists' })
   async update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto): Promise<students> {
     return this.studentsService.update(id, updateStudentDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
-    @Roles('admin', 'superadmin')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Talabani o‘chirish' })
-  @ApiParam({ name: 'id', description: 'Talabaning UUID identifikatori', type: String })
-  @ApiResponse({ status: 204, description: 'Talaba muvaffaqiyatli o‘chirildi' })
-  @ApiResponse({ status: 404, description: 'Talaba topilmadi' })
+  @ApiOperation({ summary: 'Delete student by ID' })
+  @ApiParam({ name: 'id', description: 'Student UUID', type: String })
+  @ApiResponse({ status: 204, description: 'Student deleted' })
+  @ApiResponse({ status: 404, description: 'Student not found' })
   async remove(@Param('id') id: string): Promise<void> {
     return this.studentsService.remove(id);
   }
